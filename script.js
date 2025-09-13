@@ -162,7 +162,10 @@ class PDFViewer {
                 // Add CORS headers for local development
                 httpHeaders: {
                     'Access-Control-Allow-Origin': '*'
-                }
+                },
+                // Additional options for better compatibility
+                verbosity: 0,
+                stopAtErrors: false
             });
             
             // Add progress callback
@@ -186,19 +189,46 @@ class PDFViewer {
             
         } catch (error) {
             console.error('Error loading PDF:', error);
-            let errorMessage = 'Error loading PDF. ';
             
-            if (error.name === 'InvalidPDFException') {
-                errorMessage += 'The file may not be a valid PDF.';
-            } else if (error.name === 'MissingPDFException') {
-                errorMessage += 'The PDF file could not be found.';
-            } else if (error.message.includes('CORS')) {
-                errorMessage += 'CORS error - try using the local server for development.';
-            } else {
-                errorMessage += `Error: ${error.message}`;
+            // Try fallback method with different URL format
+            try {
+                console.log('Trying fallback method...');
+                const repoInfo = this.getRepositoryInfo();
+                const fallbackUrl = `https://github.com/${repoInfo.owner}/${repoInfo.repo}/raw/main/${encodeURIComponent(file.name)}`;
+                console.log('Fallback URL:', fallbackUrl);
+                
+                const fallbackTask = pdfjsLib.getDocument(fallbackUrl);
+                this.currentPDF = await fallbackTask.promise;
+                this.totalPages = this.currentPDF.numPages;
+                this.currentPage = 1;
+                
+                console.log('PDF loaded successfully with fallback method:', this.totalPages, 'pages');
+                
+                // Restore canvas element for rendering
+                canvas.parentElement.innerHTML = '<canvas id="pdfCanvas"></canvas>';
+                await this.renderPage();
+                this.updatePageInfo();
+                return;
+                
+            } catch (fallbackError) {
+                console.error('Fallback method also failed:', fallbackError);
+                
+                let errorMessage = 'Error loading PDF. ';
+                
+                if (error.name === 'InvalidPDFException') {
+                    errorMessage += 'The file may not be a valid PDF.';
+                } else if (error.name === 'MissingPDFException') {
+                    errorMessage += 'The PDF file could not be found.';
+                } else if (error.message.includes('CORS')) {
+                    errorMessage += 'CORS error - try using the local server for development.';
+                } else {
+                    errorMessage += `Error: ${error.message}`;
+                }
+                
+                errorMessage += `<br><br>You can try opening the PDF directly: <a href="${pdfUrl}" target="_blank">${file.name}</a>`;
+                
+                canvas.parentElement.innerHTML = `<div class="loading">${errorMessage}</div>`;
             }
-            
-            canvas.parentElement.innerHTML = `<div class="loading">${errorMessage}</div>`;
         }
     }
     
