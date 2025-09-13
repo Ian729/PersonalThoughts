@@ -132,8 +132,24 @@ class PDFViewer {
             // Show loading state
             canvas.parentElement.innerHTML = '<div class="loading">Loading PDF...</div>';
             
+            // Get repository info for URL construction
+            const repoInfo = this.getRepositoryInfo();
+            
             // Load PDF from GitHub raw content
-            const pdfUrl = file.download_url;
+            let pdfUrl = file.download_url;
+            
+            // Fix URL encoding issues for special characters
+            if (repoInfo && repoInfo.isLocal) {
+                // For local development, use the download_url as is
+                pdfUrl = file.download_url;
+            } else {
+                // For GitHub Pages, construct the raw URL properly
+                const fileName = encodeURIComponent(file.name);
+                const owner = repoInfo ? repoInfo.owner : 'Ian729';
+                const repo = repoInfo ? repoInfo.repo : 'PersonalThoughts';
+                pdfUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${fileName}`;
+            }
+            
             console.log('Loading PDF from:', pdfUrl);
             
             // Configure PDF.js for better compatibility
