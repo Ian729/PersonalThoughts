@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Thoughts - Information Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Personal Thoughts</h1>
+            <p>My Information Hub</p>
+        </header>
+        
+        <main>
+            <div class="pdf-grid" id="pdfGrid">
+                <!-- PDFs will be dynamically loaded here -->
+            </div>
+        </main>
+        
+        <div class="pdf-viewer-modal" id="pdfModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="pdfTitle"></h2>
+                    <button class="close-btn" id="closeBtn">&times;</button>
+                </div>
+                <div class="pdf-container">
+                    <canvas id="pdfCanvas"></canvas>
+                </div>
+                <div class="pdf-controls">
+                    <button id="prevPage">Previous</button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button id="nextPage">Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
